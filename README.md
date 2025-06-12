@@ -38,10 +38,21 @@ docker-compose -f docker-compose.yaml up -d
 
 This will run all services (except Go service) in Docker
 
-### 3. Enable Logical Replication on PostgreSQL
+### 3. Create Table and Enable Logical Replication on PostgreSQL
+
+#### Create table products and add row data
 
 ```bash
-docker exec -it postgres-debezium
+CREATE TABLE products (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255),
+    price DECIMAL
+);
+INSERT INTO products (name, price) VALUES ('Product A', 100.00);
+```
+
+```bash
+docker exec -it postgres-debezium bash
 psql -U admin -d debezium-demo
 ```
 
