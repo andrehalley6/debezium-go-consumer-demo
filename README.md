@@ -26,21 +26,36 @@ This project demonstrates how to consume PostgreSQL change events using **Debezi
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/your-username/debezium-go-consumer-demo.git
+git clone https://github.com/andrehalley6/debezium-go-consumer-demo.git
 cd debezium-go-consumer-demo
 ```
 
 ### 2. Start services with Docker Compose
 
+#### Run in background
+
 ```bash
-docker-compose -f docker-compose.yaml up -d
+docker-compose -p go-docker-debezium -f docker-compose.yaml up -d
 ```
 
-This will run all services (except Go service) in Docker
+#### Run in terminal
+
+```bash
+docker-compose -p go-docker-debezium -f docker-compose.yaml up --build
+```
+
+This will run all services in Docker
 
 ### 3. Create Table and Enable Logical Replication on PostgreSQL
 
-#### Create table products and add row data
+#### In your terminal run this command
+
+```bash
+docker exec -it postgres-debezium bash
+psql -U admin -d debezium-demo
+```
+
+#### Create table products and add row data inside PostgreSQL terminal
 
 ```bash
 CREATE TABLE products (
@@ -51,19 +66,14 @@ CREATE TABLE products (
 INSERT INTO products (name, price) VALUES ('Product A', 100.00);
 ```
 
-```bash
-docker exec -it postgres-debezium bash
-psql -U admin -d debezium-demo
-```
-
-#### Inside the PostgreSQL terminal, run:
+#### Then run to enable WAL (Write Ahead Log):
 
 ```bash
 ALTER SYSTEM SET wal_level = logical;
 SELECT pg_reload_conf();
 ```
 
-#### Restart PostgreSQL container
+#### Exit PostgreSQL terminal and restart PostgreSQL container
 ```bash
 docker restart postgres-debezium
 ```

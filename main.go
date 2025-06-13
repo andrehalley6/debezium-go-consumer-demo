@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"math"
 	"math/big"
 	"os"
 	"os/signal"
@@ -13,28 +14,28 @@ import (
 	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 )
 
-func decodeDecimal(base64Str string, scale int) float64 {
-	bytes, err := base64.StdEncoding.DecodeString(base64Str)
+func decodeDecimal(base64Value string, scale int) float64 {
+	// Decode the base64 string to bytes
+	decodedBytes, err := base64.StdEncoding.DecodeString(base64Value)
 	if err != nil {
 		return 0
 	}
 
-	// Reverse the byte slice to match the Java BigInteger behavior
-	for i, j := 0, len(bytes)-1; i < j; i, j = i+1, j-1 {
-		bytes[i], bytes[j] = bytes[j], bytes[i]
-	}
+	// Convert bytes to big.Int
+	intVal := new(big.Int).SetBytes(decodedBytes)
 
-	bi := new(big.Int).SetBytes(bytes)
-	val := new(big.Float).SetInt(bi)
+	// Convert to big.Float for division
+	num := new(big.Float).SetInt(intVal)
 
-	scaleFactor := new(big.Float).SetFloat64(float64(1))
-	for i := 0; i < scale; i++ {
-		scaleFactor.Mul(scaleFactor, big.NewFloat(10))
-	}
+	// Calculate divisor = 10^scale using math.Pow
+	divisor := math.Pow(10, float64(scale))
 
-	val.Quo(val, scaleFactor)
-	f64, _ := val.Float64()
-	return f64
+	// Divide and return
+	result := new(big.Float).Quo(num, big.NewFloat(divisor))
+
+	// Convert to float64
+	floatVal, _ := result.Float64()
+	return floatVal
 }
 
 func main() {
