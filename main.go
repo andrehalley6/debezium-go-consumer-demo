@@ -44,7 +44,7 @@ func main() {
 	consumer, err := kafka.NewConsumer(&kafka.ConfigMap{
 		"bootstrap.servers": "localhost:29092",
 		"group.id":          "debezium-go-consumer",
-		"auto.offset.reset": "earliest",
+		"auto.offset.reset": "earliest", // use "latest" for latest messages
 	})
 	if err != nil {
 		panic(err)
@@ -88,7 +88,7 @@ func main() {
 			payload := root["payload"].(map[string]interface{})
 			op := payload["op"].(string)
 
-			if op == "c" || op == "u" {
+			if op == "c" || op == "u" || op == "r" {
 				after := payload["after"].(map[string]interface{})
 				id := int(after["id"].(float64))
 				name := after["name"].(string)
@@ -101,6 +101,8 @@ func main() {
 					fmt.Printf("Created id: %d, name: %s, price: %.2f\n", id, name, price)
 				} else if op == "u" {
 					fmt.Printf("Updated id: %d, name: %s, price: %.2f\n", id, name, price)
+				} else if op == "r" {
+					fmt.Printf("Read id: %d, name: %s, price: %.2f\n", id, name, price)
 				}
 			} else if op == "d" {
 				before := payload["before"].(map[string]interface{})
