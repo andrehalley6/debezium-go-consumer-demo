@@ -74,6 +74,11 @@ func main() {
 				continue
 			}
 
+			if msg.Value == nil {
+				fmt.Println("Skipping empty message")
+				continue
+			}
+
 			fmt.Println("Raw message:")
 			fmt.Println(string(msg.Value))
 			fmt.Println("--------------------------------------------------------------------------------")
